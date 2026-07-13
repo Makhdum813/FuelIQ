@@ -1,3 +1,12 @@
+/*!
+ * FuelIQ — E20 Fuel Economics Analytics
+ * https://fueliq-app.netlify.app/
+ *
+ * Copyright (c) 2026 Makhdumhusain Kodkeri
+ * Released under the MIT License. You may reuse and modify this code,
+ * provided this copyright notice and the licence text are retained.
+ * https://github.com/Makhdum813
+ */
 /**
  * modules/fuelBlend.js
  * ---------------------------------------------------------------------------

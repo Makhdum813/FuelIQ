@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="author" content="Makhdumhusain Kodkeri">
+<meta name="copyright" content="Copyright (c) 2026 Makhdumhusain Kodkeri. Licensed under the MIT License.">
+<link rel="license" href="https://github.com/Makhdum813">
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XNHPZY3TF4"></script>
 <script>
@@ -11,7 +15,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>E20 Mileage &amp; Cost Impact Calculator</title>
+<title>FuelIQ — E20 Mileage &amp; Cost Impact Calculator</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0f14">
 <meta name="description" content="See how switching to E20 petrol affects your mileage, fuel cost, and monthly running expenses.">
@@ -29,7 +33,7 @@
     <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
-    <div class="mobile-topbar-title">⛽ E20 Calculator</div>
+    <div class="mobile-topbar-title"><img class="brand-logo" src="assets/logo.png" alt="" width="24" height="24">Fuel<b>IQ</b></div>
     <div class="theme-toggle" id="themeToggleMobile" role="button" aria-label="Toggle theme">
       <div class="toggle-track"><div class="toggle-dot"></div></div>
     </div>
@@ -39,10 +43,10 @@
 
   <nav class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
-      <span class="brand-icon">⛽</span>
+      <img class="brand-logo" src="assets/logo.png" alt="FuelIQ logo" width="38" height="38">
       <div>
-        <div class="brand-title">E20 Calculator</div>
-        <div class="brand-sub">Mileage &amp; Cost Impact</div>
+        <div class="brand-title">Fuel<b>IQ</b></div>
+        <div class="brand-sub">E20 Mileage &amp; Cost Impact</div>
       </div>
     </div>
     <a class="home-link" href="../index.html" aria-label="Back to FuelIQ home page">
@@ -301,17 +305,19 @@
               <option value="">Select company…</option>
             </select>
           </div>
+          <input type="text" id="customCompany" class="custom-input" placeholder="Type the manufacturer name" style="display:none;" maxlength="40">
         </div>
 
         <div class="field">
           <label>Vehicle Model
-            <span class="tip">i<span class="bubble">Pick a model — the reference image and quick facts load automatically from Wikipedia.</span></span>
+            <span class="tip">i<span class="bubble">Can't find your model? Choose "Other — type your own" at the bottom of the list and enter any name.</span></span>
           </label>
           <div class="input-row no-prefix">
             <select id="vehicleModel" class="styled-select" disabled>
               <option value="">Select company first…</option>
             </select>
           </div>
+          <input type="text" id="customModel" class="custom-input" placeholder="Type your model name" style="display:none;" maxlength="40">
         </div>
 
         <div class="field">
@@ -336,9 +342,15 @@
           </div>
         </div>
 
-        <div class="btn-row" style="margin-bottom:16px;">
+        <div class="btn-row" style="margin-bottom:10px;">
           <button class="btn btn-ghost" id="fetchImageBtn">🔄 Refresh Image</button>
           <button class="btn btn-primary" id="saveProfileBtn">💾 Save Vehicle</button>
+        </div>
+
+        <div class="btn-row" style="margin-bottom:16px;">
+          <button class="btn btn-ghost" id="uploadPhotoBtn">📷 Upload Your Photo</button>
+          <button class="btn btn-ghost" id="removePhotoBtn" style="display:none;">🗑 Remove Photo</button>
+          <input type="file" id="photoInput" accept="image/*" style="display:none;">
         </div>
 
         <div class="vehicle-preview" id="vehiclePreview">
@@ -700,6 +712,37 @@
       <li>IEA Advanced Motor Fuels programme — ethanol and gasoline fuel property data (energy content per litre)</li>
       <li>US Department of Energy, Alternative Fuels Data Center — fuel property comparisons</li>
     </ul>
+  </div>
+
+  <div class="section-title">Licence &amp; Legal</div>
+  <div class="card">
+    <h2><span class="ic">©</span>Copyright, licence and disclaimer</h2>
+    <p class="edu-p">
+      <strong>FuelIQ</strong> — E20 Fuel Economics Analytics.<br>
+      Copyright © 2026 <strong>Makhdumhusain Kodkeri</strong>. All rights reserved except as granted below.
+    </p>
+    <p class="edu-p">
+      FuelIQ is free and open-source software, released under the <strong>MIT Licence</strong>. You are free to
+      use, copy, modify and distribute it — including commercially — on one condition: the original copyright
+      notice and licence text must be retained in any copy or substantial portion of the software.
+      <strong>Attribution is required.</strong> The full licence text ships with the source code.
+    </p>
+    <p class="edu-p">
+      <strong>Disclaimer.</strong> FuelIQ produces estimates for informational and educational purposes only,
+      derived from publicly available data and a clearly-labelled energy-density model. Real-world fuel economy
+      depends on your vehicle's condition, driving style, load, terrain and traffic. Figures shown are not a
+      guarantee of actual savings or costs, and nothing here constitutes financial, mechanical or professional
+      advice. Always verify against your own measured mileage.
+    </p>
+    <p class="edu-p">
+      <strong>Privacy.</strong> FuelIQ has no backend and no user accounts. Every vehicle, fuel-log entry and
+      calculation is stored solely in your own browser's local storage and is never transmitted to any server.
+    </p>
+    <p class="edu-p">
+      <strong>Name.</strong> "FuelIQ" is used here as the name of an independent personal project. It is not
+      affiliated with, endorsed by, or connected to any other company, product or registered trade mark of a
+      similar name.
+    </p>
   </div>
       </section>
 

@@ -1,3 +1,12 @@
+/*!
+ * FuelIQ — E20 Fuel Economics Analytics
+ * https://fueliq-app.netlify.app/
+ *
+ * Copyright (c) 2026 Makhdumhusain Kodkeri
+ * Released under the MIT License. You may reuse and modify this code,
+ * provided this copyright notice and the licence text are retained.
+ * https://github.com/Makhdum813
+ */
 /**
  * modules/vehicleProfiles.js
  * ---------------------------------------------------------------------------
@@ -34,11 +43,14 @@
       model: (data.model || "").trim(),
       mileage: isFinite(data.mileage) ? Number(data.mileage) : null,
       fuelType: FUEL_TYPES.includes(data.fuelType) ? data.fuelType : "Petrol",
+      photo: data.photo || null,
       createdAt: now,
       updatedAt: now,
     };
     vehicles.push(record);
-    storage.saveVehicles(vehicles);
+    if (!storage.saveVehicles(vehicles)) {
+      throw new Error("Storage is full — remove a vehicle photo and try again.");
+    }
     return record;
   }
 
@@ -48,8 +60,11 @@
     const vehicles = list();
     const idx = vehicles.findIndex(function (v) { return v.id === id; });
     if (idx === -1) return null;
-    vehicles[idx] = Object.assign({}, vehicles[idx], patch, { updatedAt: Date.now() });
-    storage.saveVehicles(vehicles);
+    const previous = vehicles[idx];
+    vehicles[idx] = Object.assign({}, previous, patch, { updatedAt: Date.now() });
+    if (!storage.saveVehicles(vehicles)) {
+      throw new Error("Storage is full — remove a vehicle photo and try again.");
+    }
     return vehicles[idx];
   }
 

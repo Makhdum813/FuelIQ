@@ -1,3 +1,12 @@
+/*!
+ * FuelIQ — E20 Fuel Economics Analytics
+ * https://fueliq-app.netlify.app/
+ *
+ * Copyright (c) 2026 Makhdumhusain Kodkeri
+ * Released under the MIT License. You may reuse and modify this code,
+ * provided this copyright notice and the licence text are retained.
+ * https://github.com/Makhdum813
+ */
 (function(){
   "use strict";
 
@@ -38,6 +47,11 @@
     vehicleType: document.getElementById('vehicleType'),
     vehicleCompany: document.getElementById('vehicleCompany'),
     vehicleModel: document.getElementById('vehicleModel'),
+    customCompany: document.getElementById('customCompany'),
+    customModel: document.getElementById('customModel'),
+    uploadPhotoBtn: document.getElementById('uploadPhotoBtn'),
+    removePhotoBtn: document.getElementById('removePhotoBtn'),
+    photoInput: document.getElementById('photoInput'),
     vehicleMileage: document.getElementById('vehicleMileage'),
     vehicleFuelType: document.getElementById('vehicleFuelType'),
     fetchImageBtn: document.getElementById('fetchImageBtn'),
@@ -1346,51 +1360,114 @@
     scooter: '<svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><circle cx="5.5" cy="17.5" r="3"/><circle cx="18.5" cy="17.5" r="3"/><path d="M8.3 17.5h7.7l-1-6h-5a2 2 0 0 1-2-2V7h4"/></svg>',
   };
 
-  // Curated type → company → models map. Not exhaustive, but covers the popular
-  // models people in India are likely to look up. "Company (Model)" is used as
-  // the Wikipedia search query so results land on the right page.
+  // Curated type → company → models map. Broad coverage of the Indian market,
+  // including discontinued models people still own. It can never be exhaustive,
+  // so every dropdown also offers an "Other" option that accepts free text —
+  // that, not this list, is what guarantees any vehicle can be entered.
+  const OTHER = "__other__";
+
   const VEHICLE_DB = {
     car: {
-      "Maruti Suzuki": ["Swift","Baleno","Dzire","WagonR","Ertiga","Brezza","Alto K10","Celerio","Fronx","Grand Vitara"],
-      "Hyundai": ["Creta","Venue","i20","Verna","Exter","Alcazar","Grand i10 Nios"],
-      "Tata Motors": ["Nexon","Punch","Altroz","Harrier","Safari","Tiago","Tigor"],
-      "Mahindra": ["Scorpio-N","XUV700","Thar","Bolero","XUV300"],
-      "Honda": ["City","Amaze","Elevate"],
-      "Kia": ["Seltos","Sonet","Carens"],
-      "Toyota": ["Innova Crysta","Fortuner","Glanza","Urban Cruiser Hyryder"],
-      "Volkswagen": ["Virtus","Taigun"],
-      "Skoda": ["Slavia","Kushaq"],
-      "Renault": ["Kwid","Triber","Kiger"],
-      "Nissan": ["Magnite"],
+      "Maruti Suzuki": ["Swift","Baleno","Dzire","WagonR","Alto K10","Alto 800","Celerio","Ignis","Ertiga","XL6","Brezza","Vitara Brezza","Fronx","Jimny","Grand Vitara","Invicto","Eeco","S-Presso","Ciaz","S-Cross","Ritz","A-Star","Zen Estilo","Esteem","Omni","Gypsy","800","SX4"],
+      "Hyundai": ["Creta","Venue","Exter","i20","i20 N Line","Grand i10 Nios","Aura","Verna","Alcazar","Tucson","Ioniq 5","Kona Electric","Santro","Xcent","Elantra","Eon","Getz","Accent","i10","Accent Viva"],
+      "Tata Motors": ["Nexon","Nexon EV","Punch","Punch EV","Altroz","Tiago","Tiago EV","Tigor","Curvv","Harrier","Safari","Hexa","Bolt","Zest","Indica","Indigo","Sumo","Aria","Nano","Vista","Manza"],
+      "Mahindra": ["Scorpio-N","Scorpio Classic","XUV700","XUV3XO","XUV300","XUV400","XUV500","Thar","Thar Roxx","Bolero","Bolero Neo","Marazzo","KUV100","TUV300","Xylo","Quanto","Verito","BE 6","XEV 9e"],
+      "Honda": ["City","Amaze","Elevate","Jazz","WR-V","Civic","CR-V","BR-V","Brio","Mobilio","Accord"],
+      "Kia": ["Seltos","Sonet","Carens","Syros","Carnival","EV6"],
+      "Toyota": ["Innova Crysta","Innova Hycross","Fortuner","Glanza","Urban Cruiser Hyryder","Urban Cruiser Taisor","Rumion","Camry","Vellfire","Land Cruiser","Etios","Etios Liva","Corolla Altis","Yaris","Qualis"],
+      "MG": ["Hector","Hector Plus","Astor","ZS EV","Comet EV","Windsor EV","Gloster"],
+      "Volkswagen": ["Virtus","Taigun","Polo","Vento","Ameo","Tiguan","Jetta","Passat"],
+      "Skoda": ["Slavia","Kushaq","Kylaq","Rapid","Octavia","Superb","Fabia","Laura","Kodiaq"],
+      "Renault": ["Kwid","Triber","Kiger","Duster","Captur","Lodgy","Pulse","Scala","Fluence"],
+      "Nissan": ["Magnite","Kicks","Terrano","Micra","Sunny","Evalia"],
+      "Jeep": ["Compass","Meridian","Wrangler"],
+      "Citroen": ["C3","eC3","C3 Aircross","Basalt","C5 Aircross"],
+      "Ford": ["EcoSport","Figo","Aspire","Freestyle","Endeavour","Fiesta","Ikon"],
+      "Chevrolet": ["Beat","Spark","Cruze","Sail","Enjoy","Tavera","Optra"],
+      "Datsun": ["GO","GO+","redi-GO"],
+      "Fiat": ["Punto","Linea","Palio"],
+      "BMW": ["3 Series","5 Series","X1","X3","X5"],
+      "Mercedes-Benz": ["A-Class","C-Class","E-Class","GLA","GLC","GLE"],
+      "Audi": ["A4","A6","Q3","Q5","Q7"],
     },
     motorcycle: {
-      "Hero MotoCorp": ["Splendor Plus","HF Deluxe","Passion Pro","Glamour","Xtreme 160R"],
-      "Bajaj": ["Pulsar 150","Pulsar NS200","Platina","Avenger Street 160","Dominar 400"],
-      "TVS": ["Apache RTR 160","Raider 125","Sport"],
-      "Royal Enfield": ["Classic 350","Bullet 350","Hunter 350","Himalayan","Meteor 350"],
-      "Yamaha": ["FZ-S","MT-15","R15 V4"],
-      "Honda": ["Shine","Unicorn","Hornet 2.0","CB350"],
-      "Suzuki": ["Gixxer","Gixxer SF"],
-      "KTM": ["Duke 200","Duke 390"],
+      "Hero MotoCorp": ["Splendor Plus","Splendor Plus XTEC","Splendor NXG","Splendor iSmart","Super Splendor","HF Deluxe","HF 100","Passion Pro","Passion XPro","Passion Plus","Glamour","Glamour XTEC","Xtreme 125R","Xtreme 160R","Xtreme 200S","Xtreme 250R","Karizma R","Karizma ZMR","Karizma XMR","Xpulse 200","Xpulse 200 4V","Xpulse 200T","Mavrick 440","Achiever","Hunk","CBZ Xtreme","CD Dawn","CD Deluxe","Ignitor","Impulse","Ambition"],
+      "Bajaj": ["Pulsar 125","Pulsar 150","Pulsar 180","Pulsar 220F","Pulsar N125","Pulsar N150","Pulsar N160","Pulsar N250","Pulsar NS125","Pulsar NS160","Pulsar NS200","Pulsar NS400Z","Pulsar RS200","Pulsar F250","Platina 100","Platina 110","CT 100","CT 110X","Discover 110","Discover 125","Discover 150","Avenger Street 160","Avenger Cruise 220","Dominar 250","Dominar 400","Freedom 125","Boxer","Pulsar AS200","XCD 125","Kawasaki Eliminator"],
+      "TVS": ["Apache RTR 160","Apache RTR 160 4V","Apache RTR 180","Apache RTR 200 4V","Apache RR 310","Raider 125","Ronin","Radeon","Sport","Star City Plus","Victor","Phoenix 125","Apache RTR 165 RP"],
+      "Royal Enfield": ["Classic 350","Bullet 350","Hunter 350","Meteor 350","Himalayan 411","Himalayan 450","Scram 411","Scram 440","Interceptor 650","Continental GT 650","Super Meteor 650","Shotgun 650","Guerrilla 450","Thunderbird 350","Thunderbird 500","Electra 350","Standard 350","Classic 500","Goan Classic 350"],
+      "Honda": ["Shine","Shine 100","SP 125","SP 160","Unicorn","Hornet 2.0","CB350","CB350RS","H'ness CB350","CB300F","CB300R","CB200X","Livo","Dream Yuga","Dream Neo","X-Blade","CBR 150R","CBR 250R","CB Hornet 160R","CB Twister","NX500","CB500X"],
+      "Yamaha": ["FZ-S","FZ-S Fi V4","FZ-X","FZ 25","FZS 25","MT-15","MT-15 V2","R15 V4","R15 V3","R15 S","R3","YZF-R15","Saluto","SZ-RR","Crux","Fazer 25","Fazer Fi"],
+      "Suzuki": ["Gixxer","Gixxer SF","Gixxer 250","Gixxer SF 250","Intruder 150","V-Strom SX","Hayabusa","GS150R","Slingshot","Heat","Zeus"],
+      "KTM": ["Duke 125","Duke 200","Duke 250","Duke 390","RC 125","RC 200","RC 390","Adventure 250","Adventure 390","Duke 160"],
+      "Jawa": ["Jawa 42","Jawa 42 Bobber","Jawa Classic","Perak","Jawa 350"],
+      "Yezdi": ["Roadster","Scrambler","Adventure"],
+      "Harley-Davidson": ["X440","Iron 883","Street 750","Forty-Eight"],
+      "Triumph": ["Speed 400","Scrambler 400X","Speed T4","Speed Twin","Bonneville"],
+      "Kawasaki": ["Ninja 300","Ninja 400","Ninja 650","Z650","Versys 650","W175","Vulcan S"],
+      "BMW": ["G 310 R","G 310 GS","G 310 RR"],
+      "Aprilia": ["RS 457","Tuono 457","RSV4"],
+      "Mahindra": ["Mojo","Centuro","Gusto"],
+      "Benelli": ["Imperiale 400","Leoncino 500","TRK 502"],
+      "Hero Honda": ["Splendor","Passion","CBZ","Karizma","CD 100"],
     },
     scooter: {
-      "Honda": ["Activa 6G","Activa 125","Dio"],
-      "TVS": ["Jupiter","Ntorq 125","iQube"],
-      "Suzuki": ["Access 125","Burgman Street"],
-      "Hero MotoCorp": ["Pleasure Plus","Destini 125","Maestro Edge"],
-      "Bajaj": ["Chetak"],
-      "Yamaha": ["Fascino 125","RayZR 125"],
-      "Ather": ["450X","450S"],
-      "Ola Electric": ["S1 Pro","S1 Air"],
+      "Honda": ["Activa 6G","Activa 125","Activa 110","Activa e","Dio","Dio 125","Grazia","Aviator","Cliq"],
+      "TVS": ["Jupiter","Jupiter 125","Ntorq 125","iQube","Zest 110","Scooty Pep Plus","Scooty Zest","Wego","Orbiter","Scooty Streak"],
+      "Suzuki": ["Access 125","Avenis 125","Burgman Street","Burgman Street EX","Let's","Swish"],
+      "Hero MotoCorp": ["Pleasure Plus","Pleasure Plus XTEC","Destini 125","Destini 110","Maestro Edge 110","Maestro Edge 125","Xoom 110","Xoom 125","Xoom 160","Duet"],
+      "Yamaha": ["Fascino 125","RayZR 125","Aerox 155","Alpha","Cygnus Ray Z"],
+      "Bajaj": ["Chetak","Chetak 3202","Chetak 3501"],
+      "Ather": ["450X","450S","450 Apex","Rizta"],
+      "Ola Electric": ["S1 Pro","S1 Air","S1 X","S1 X+","S1 Pro Sport"],
+      "Vida": ["V1 Pro","V1 Plus","VX2"],
+      "Ampere": ["Magnus EX","Primus","Nexus"],
+      "Okinawa": ["Praise Pro","iPraise+","Ridge+"],
+      "Hero Electric": ["Optima","Photon","Nyx"],
+      "Simple Energy": ["Simple One","Simple Dot One"],
+      "Aprilia": ["SR 160","SXR 160","SR 125"],
+      "Vespa": ["SXL 150","VXL 150","ZX 125","Urban Club"],
+      "River": ["Indie"],
     },
   };
+
+  // ---- Company / model resolution -------------------------------------------
+  // Both dropdowns end with an "Other" option that reveals a free-text input.
+  // Everything downstream reads the vehicle's company/model through these two
+  // accessors, so a typed-in vehicle is treated exactly like a listed one.
+  function getCompany(){
+    if(el.vehicleCompany.value === OTHER){
+      return (el.customCompany.value || '').trim();
+    }
+    return el.vehicleCompany.value;
+  }
+  function getModel(){
+    if(el.vehicleCompany.value === OTHER || el.vehicleModel.value === OTHER){
+      return (el.customModel.value || '').trim();
+    }
+    return el.vehicleModel.value;
+  }
+
+  // Show/hide the free-text inputs to match the current dropdown selections.
+  function syncCustomInputs(){
+    const companyIsOther = el.vehicleCompany.value === OTHER;
+    const modelIsOther = el.vehicleModel.value === OTHER;
+    el.customCompany.style.display = companyIsOther ? 'block' : 'none';
+    // If the company is custom, there's no model list to pick from — the user
+    // types the model too.
+    el.customModel.style.display = (companyIsOther || modelIsOther) ? 'block' : 'none';
+    el.vehicleModel.disabled = companyIsOther || !el.vehicleCompany.value;
+    if(companyIsOther){
+      el.vehicleModel.innerHTML = '<option value="">Type the model below…</option>';
+    }
+  }
 
   // Fill the Company dropdown with the manufacturers available for the selected type.
   function populateCompanies(){
     const type = el.vehicleType.value;
     const companies = Object.keys(VEHICLE_DB[type] || {});
     el.vehicleCompany.innerHTML = '<option value="">Select company…</option>' +
-      companies.map(c => '<option value="' + c + '">' + c + '</option>').join('');
+      companies.map(c => '<option value="' + c + '">' + c + '</option>').join('') +
+      '<option value="' + OTHER + '">Other — type your own…</option>';
     el.vehicleCompany.disabled = false;
     resetModelDropdown('Select company first…');
     renderVehicleFallback('Pick a company, then a model, to see a reference image here.');
@@ -1406,13 +1483,18 @@
   function populateModels(){
     const type = el.vehicleType.value;
     const company = el.vehicleCompany.value;
+    if(company === OTHER){
+      syncCustomInputs();
+      return;
+    }
     const models = (VEHICLE_DB[type] && VEHICLE_DB[type][company]) || [];
-    if(!company || models.length === 0){
+    if(!company){
       resetModelDropdown('Select company first…');
       return;
     }
     el.vehicleModel.innerHTML = '<option value="">Select model…</option>' +
-      models.map(m => '<option value="' + m + '">' + m + '</option>').join('');
+      models.map(m => '<option value="' + escapeHTML(m) + '">' + escapeHTML(m) + '</option>').join('') +
+      '<option value="' + OTHER + '">Other — type your own…</option>';
     el.vehicleModel.disabled = false;
   }
 
@@ -1465,8 +1547,8 @@
 
   // Query Wikipedia's public, CORS-enabled API for a page image + short intro matching the vehicle query.
   async function fetchVehicleImage(){
-    const company = el.vehicleCompany.value.trim();
-    const model = el.vehicleModel.value.trim();
+    const company = getCompany();
+    const model = getModel();
     if(!model){
       showToast('Select a model first');
       return;
@@ -1508,15 +1590,28 @@
   el.vehicleType.addEventListener('change', function(){
     showTypeIcon();
     populateCompanies();
+    el.customCompany.value = '';
+    el.customModel.value = '';
+    syncCustomInputs();
   });
 
   el.vehicleCompany.addEventListener('change', function(){
     populateModels();
-    renderVehicleFallback(el.vehicleCompany.value ? 'Now pick a model to load its image.' : 'Pick a company, then a model, to see a reference image here.');
+    syncCustomInputs();
+    // Don't wipe a photo the user just uploaded.
+    if(currentPhoto) return;
+    renderVehicleFallback(getCompany() ? 'Now pick a model to load its image.' : 'Pick a company, then a model, to see a reference image here.');
   });
 
   el.vehicleModel.addEventListener('change', function(){
-    if(el.vehicleModel.value) fetchVehicleImage();
+    syncCustomInputs();
+    if(el.vehicleModel.value === OTHER){
+      el.customModel.focus();
+      return;
+    }
+    // A user's own photo always wins over the Wikipedia reference image.
+    if(currentPhoto) return;
+    if(getModel()) fetchVehicleImage();
   });
 
   /* ============ Vehicle profiles ============ */
@@ -1551,6 +1646,114 @@
   // has no mileage of its own.
   const DEFAULT_MILEAGE = { car: 15, bike: 45, scooter: 45 };
 
+  // ---- Custom vehicle photo -------------------------------------------------
+  // Holds the photo for the vehicle currently in the form (data URI or null).
+  // Persisted onto the vehicle record when the profile is saved.
+  let currentPhoto = null;
+
+  // Phone photos are multi-megabyte; localStorage gives us only ~5MB in total.
+  // So we downscale to a sane width and re-encode before storing. A 720px WebP
+  // lands around 40-80KB, which is safe to keep dozens of.
+  function compressImage(file, maxWidth, quality){
+    return new Promise(function(resolve, reject){
+      const reader = new FileReader();
+      reader.onerror = function(){ reject(new Error('Could not read that file.')); };
+      reader.onload = function(){
+        const img = new Image();
+        img.onerror = function(){ reject(new Error('That file is not a valid image.')); };
+        img.onload = function(){
+          const scale = Math.min(1, maxWidth / img.width);
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          // Prefer WebP; fall back to JPEG on browsers that don't encode WebP.
+          let out = canvas.toDataURL('image/webp', quality);
+          if(out.indexOf('data:image/webp') !== 0){
+            out = canvas.toDataURL('image/jpeg', quality);
+          }
+          resolve(out);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Paint a user-uploaded photo into the preview panel.
+  function renderCustomPhoto(dataUri){
+    el.vehiclePreview.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = dataUri;
+    img.alt = 'Your vehicle photo';
+    el.vehiclePreview.appendChild(img);
+    el.vpMeta.style.display = 'block';
+    el.vpTitle.textContent = 'Your photo';
+    el.vpExtract.textContent = 'This is your own uploaded photo. It is stored only on this device and replaces the reference image.';
+    if(el.removePhotoBtn) el.removePhotoBtn.style.display = 'inline-flex';
+  }
+
+  // Reflect whichever photo state applies to the vehicle currently in the form.
+  function syncPhotoState(){
+    if(currentPhoto){
+      renderCustomPhoto(currentPhoto);
+    } else if(el.removePhotoBtn){
+      el.removePhotoBtn.style.display = 'none';
+    }
+  }
+
+  // If a vehicle is already saved, persist the photo change immediately so the
+  // user doesn't have to remember to hit Save Vehicle again.
+  function persistPhotoToActiveVehicle(){
+    const activeId = storageApi.getActiveVehicleId();
+    if(!activeId || !vehiclesApi.getById(activeId)) return;
+    try{
+      vehiclesApi.update(activeId, { photo: currentPhoto });
+    }catch(err){
+      showToast('Could not save the photo — storage may be full.');
+    }
+  }
+
+  if(el.uploadPhotoBtn){
+    el.uploadPhotoBtn.addEventListener('click', function(){ el.photoInput.click(); });
+  }
+
+  if(el.photoInput){
+    el.photoInput.addEventListener('change', async function(){
+      const file = el.photoInput.files && el.photoInput.files[0];
+      if(!file) return;
+      if(!file.type || file.type.indexOf('image/') !== 0){
+        showToast('Please choose an image file');
+        el.photoInput.value = '';
+        return;
+      }
+      renderVehicleLoading();
+      try{
+        const dataUri = await compressImage(file, 720, 0.78);
+        currentPhoto = dataUri;
+        renderCustomPhoto(dataUri);
+        persistPhotoToActiveVehicle();
+        showToast('Photo added — it stays on this device only');
+      }catch(err){
+        renderVehicleFallback('Could not use that image. Try a different photo.');
+        showToast(err.message || 'Could not process that image');
+      }
+      el.photoInput.value = ''; // allow re-picking the same file
+    });
+  }
+
+  if(el.removePhotoBtn){
+    el.removePhotoBtn.addEventListener('click', function(){
+      currentPhoto = null;
+      el.removePhotoBtn.style.display = 'none';
+      persistPhotoToActiveVehicle();
+      renderVehicleFallback('Photo removed. Hit "Refresh Image" for a reference photo, or upload your own.');
+      showToast('Photo removed');
+    });
+  }
+
   // Fill the type/company/model/fuel-type/mileage fields from a saved profile,
   // without triggering an image fetch (the user already has a saved image
   // context; re-fetching on every profile switch would be noisy).
@@ -1558,9 +1761,33 @@
     el.vehicleType.value = vehicle.type;
     showTypeIcon();
     populateCompanies();
-    el.vehicleCompany.value = vehicle.company;
-    populateModels();
-    el.vehicleModel.value = vehicle.model;
+
+    // A saved vehicle may use a company/model that isn't in the curated list
+    // (entered via "Other"). Detect that and restore it into the free-text
+    // inputs rather than silently dropping it.
+    const knownCompanies = Object.keys(VEHICLE_DB[vehicle.type] || {});
+    const companyIsCustom = vehicle.company && knownCompanies.indexOf(vehicle.company) === -1;
+
+    if(companyIsCustom){
+      el.vehicleCompany.value = OTHER;
+      el.customCompany.value = vehicle.company;
+      syncCustomInputs();
+      el.customModel.value = vehicle.model || '';
+    } else {
+      el.vehicleCompany.value = vehicle.company;
+      el.customCompany.value = '';
+      populateModels();
+      const knownModels = (VEHICLE_DB[vehicle.type] && VEHICLE_DB[vehicle.type][vehicle.company]) || [];
+      if(vehicle.model && knownModels.indexOf(vehicle.model) === -1){
+        el.vehicleModel.value = OTHER;
+        el.customModel.value = vehicle.model;
+      } else {
+        el.vehicleModel.value = vehicle.model;
+        el.customModel.value = '';
+      }
+      syncCustomInputs();
+    }
+
     if(el.vehicleFuelType) el.vehicleFuelType.value = vehicle.fuelType || 'Petrol';
 
     // Mileage must ALWAYS be resynced when switching vehicles. Previously this
@@ -1578,7 +1805,14 @@
     }
     if(el.vehicleMileage) el.vehicleMileage.value = el.origMileage.value;
 
-    renderVehicleFallback('Loaded from saved vehicle. Hit "Refresh Image" to fetch a reference photo.');
+    // Restore this vehicle's own photo, if it has one.
+    currentPhoto = vehicle.photo || null;
+    if(currentPhoto){
+      renderCustomPhoto(currentPhoto);
+    } else {
+      if(el.removePhotoBtn) el.removePhotoBtn.style.display = 'none';
+      renderVehicleFallback('Loaded from saved vehicle. Hit "Refresh Image" for a reference photo, or upload your own.');
+    }
     render();
   }
 
@@ -1592,6 +1826,10 @@
       if(el.vehicleMileage) el.vehicleMileage.value = '';
       if(el.profileSelect) el.profileSelect.value = '';
       if(el.calcVehicleSelect) el.calcVehicleSelect.value = '';
+      currentPhoto = null;
+      if(el.removePhotoBtn) el.removePhotoBtn.style.display = 'none';
+      el.customCompany.value = '';
+      el.customModel.value = '';
       renderFuelLogVehicleHint();
       render();
       return;
@@ -1625,7 +1863,7 @@
   }
 
   el.saveProfileBtn.addEventListener('click', function(){
-    if(!el.vehicleModel.value){
+    if(!getCompany() || !getModel()){
       showToast('Pick a type, company, and model first');
       return;
     }
@@ -1637,10 +1875,10 @@
     // create a new profile, not silently overwrite the one that was loaded.
     const formMatchesExisting = !!existingVehicle
       && existingVehicle.type === el.vehicleType.value
-      && existingVehicle.company === el.vehicleCompany.value
-      && existingVehicle.model === el.vehicleModel.value;
+      && existingVehicle.company === getCompany()
+      && existingVehicle.model === getModel();
 
-    const defaultName = formMatchesExisting ? existingVehicle.name : (el.vehicleCompany.value + ' ' + el.vehicleModel.value).trim();
+    const defaultName = formMatchesExisting ? existingVehicle.name : (getCompany() + ' ' + getModel()).trim();
 
     // Mileage for the profile comes from the Vehicle Profiles field; fall back
     // to the calculator's Original Mileage if that field is somehow empty.
@@ -1658,15 +1896,26 @@
     if(name === null) return; // user cancelled
     const data = {
       type: el.vehicleType.value,
-      company: el.vehicleCompany.value,
-      model: el.vehicleModel.value,
+      company: getCompany(),
+      model: getModel(),
+      photo: currentPhoto,
       fuelType: el.vehicleFuelType ? el.vehicleFuelType.value : 'Petrol',
       mileage: parsedMileage,
       name: name,
     };
-    const saved = formMatchesExisting
-      ? vehiclesApi.update(existingId, data)
-      : vehiclesApi.create(data);
+    let saved;
+    try{
+      saved = formMatchesExisting
+        ? vehiclesApi.update(existingId, data)
+        : vehiclesApi.create(data);
+    }catch(err){
+      showToast(err.message || 'Could not save this vehicle.');
+      return;
+    }
+    if(!saved){
+      showToast('Could not save this vehicle.');
+      return;
+    }
     vehiclesApi.setActive(saved.id);
     // Keep the calculator in step with the vehicle we just saved/activated.
     el.origMileage.value = parsedMileage;

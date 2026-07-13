@@ -1,317 +1,111 @@
-<div align="center">
+# FuelIQ — E20 Fuel Economics Analytics
 
-# ⛽ FuelIQ
+**Live app:** https://fueliq-app.netlify.app/
 
-### Measure. Compare. Save.
+An offline-first web application that quantifies the real financial impact of India's E20 petrol
+transition for individual vehicle owners — mileage loss, extra cost per kilometre, monthly and
+annual impact, multi-year ownership projections, and professional reports.
 
-#### Track Mileage. Measure Costs. Make Smarter Decisions.
-
-<p align="center">
-A modern, offline-first Progressive Web Application that helps vehicle owners understand the real financial impact of fuel choices—especially E20 petrol.
-</p>
-
-<p align="center">
-
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![PWA](https://img.shields.io/badge/PWA-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)
-![Offline First](https://img.shields.io/badge/Offline-First-00C853?style=for-the-badge)
-
-</p>
-
-<p align="center">
-
-🌐 **Live Demo:** https://makhdum813.github.io/FuelIQ/
-
-</p>
-
-</div>
+Built solo, end to end, with **vanilla HTML, CSS and JavaScript**. No frameworks, no build tools,
+no dependencies, no backend.
 
 ---
 
-# 📖 About
+## Author
 
-FuelIQ is a professional **Fuel Economics Dashboard** built to help vehicle owners analyze the real-world financial impact of fuel consumption, especially after the introduction of **E20 petrol**.
+**Makhdumhusain Kodkeri**
+AI/ML Data Annotation Specialist · Aspiring Data Analyst
 
-Rather than simply calculating mileage, FuelIQ provides comprehensive insights into fuel costs, ownership impact, trip planning, budgeting, vehicle comparison, AI-powered recommendations, and long-term fuel economics—all in a beautiful offline-first Progressive Web App.
-
----
-
-# ✨ Features
-
-## 📊 Dashboard
-
-- Smart overview of your vehicle
-- Mileage impact summary
-- Monthly & yearly cost analysis
-- Recent activity
-- Quick actions
+- GitHub: https://github.com/Makhdum813
+- LinkedIn: https://www.linkedin.com/in/makhdumhusain-kodkeri-655800305
+- Email: makhdum87@gmail.com
 
 ---
 
-## 🧮 E20 Mileage Calculator
+## Licence and attribution
 
-- Original mileage
-- Mileage loss estimation
-- Fuel cost impact
-- Cost per kilometre
-- Distance loss
-- Ownership impact
-- Interactive charts
-- AI-powered insights
+Copyright © 2026 Makhdumhusain Kodkeri.
 
----
+This project is released under the **[MIT Licence](LICENSE)**.
 
-## 🚗 Vehicle Profiles
+You are free to use, copy, modify, merge, publish, distribute, sublicense and sell copies of this
+software — including for commercial purposes — **provided that the copyright notice and the licence
+text are retained in all copies or substantial portions of the software.**
 
-- Save multiple vehicles
-- Vehicle image lookup
-- Manufacturer & model management
-- Quick vehicle switching
+In plain terms: **reuse is welcome, but you must credit the original author.** Removing the
+copyright notice and presenting this work as your own is a breach of the licence.
+
+If you build something on top of FuelIQ, I'd genuinely like to hear about it.
 
 ---
 
-## ⛽ Fuel & Mileage Log
+## Features
 
-- Record fuel fill-ups
-- Auto-calculate litres from amount paid
-- Real-world mileage calculation
-- Mileage history
-
----
-
-## 📈 Budget Planner
-
-Estimate monthly and yearly fuel expenses.
-
----
-
-## 🛣 Trip Planner
-
-Calculate trip fuel cost before you travel.
+- **E20 impact calculator** — mileage loss, cost per km, monthly and yearly impact
+- **Vehicle profiles** — save cars, bikes and scooters with their real mileage
+- **Fuel & mileage log** — track true measured mileage from actual fill-ups
+- **Smart insights** — rule-based, plain-language explanations of every result
+- **Vehicle and fuel-blend comparison** — E0 / E10 / E20 / E85 on an energy-density model
+- **Budget and trip planners**
+- **Ownership dashboard** — 1, 3 and 5-year cost projections
+- **CO₂ estimator** — tailpipe emissions before vs after
+- **PDF and CSV report export**
+- **Light and dark themes**
+- **Full offline support** — installable PWA via service worker
 
 ---
 
-## ⚖ Vehicle Comparison
+## Architecture
 
-Compare multiple saved vehicles.
+```
+index.html          Landing page
+assets/             Landing page images
+app/
+  index.html        Application shell (13 tabs)
+  app.js            Application controller
+  styles.css        Design system and all styling
+  sw.js             Service worker (offline support)
+  manifest.json     PWA manifest
+  modules/          Feature modules (calculator, vehicles, fuel log, insights, …)
+  utils/            Formatting, CSV export, share links
+  storage/          localStorage persistence layer
+```
 
----
-
-## 🧪 Fuel Blend Comparison
-
-Compare:
-
-- Petrol
-- E10
-- E20
-- E85
-
----
-
-## 📑 Professional Reports
-
-Generate:
-
-- Printable Reports
-- PDF Reports
-- CSV Export
+All computation runs client-side. There is no backend, no login and no telemetry beyond
+page-level analytics. Vehicle data, fuel logs and calculation history are stored exclusively in the
+user's own browser via `localStorage` and never leave the device.
 
 ---
 
-## 🤖 AI Insights
+## Running locally
 
-Receive intelligent recommendations based on your driving patterns.
-
----
-
-## 📂 Backup & Restore
-
-Export and restore all application data.
-
----
-
-## 📱 Progressive Web App
-
-- Installable
-- Offline Support
-- Fast Loading
-- Mobile Friendly
-
----
-
-# 🚀 Screenshots
-
-> *(Replace these placeholders with actual screenshots.)*
-
-## Dashboard
-
-![Dashboard](images/screenshots/dashboard.png)
-
----
-
-## Calculator
-
-![Calculator](images/screenshots/calculator.png)
-
----
-
-## Fuel Log
-
-![Fuel Log](images/screenshots/fuel-log.png)
-
----
-
-## Reports
-
-![Reports](images/screenshots/reports.png)
-
----
-
-# 🛠 Technology Stack
-
-- HTML5
-- CSS3
-- Vanilla JavaScript (ES6+)
-- Canvas API
-- LocalStorage
-- Service Workers
-- Progressive Web App (PWA)
-
-No frameworks.
-
-No backend.
-
-No database.
-
-Works completely offline.
-
----
-
-# 🎯 Why FuelIQ?
-
-Most drivers know:
-
-- Fuel Price
-
-Very few know:
-
-- Actual mileage loss
-- Long-term ownership cost
-- Cost per kilometre
-- Monthly financial impact
-- Effect of E20 petrol
-
-FuelIQ bridges that gap by converting raw numbers into meaningful insights.
-
----
-
-# 📦 Installation
-
-Clone the repository
+No build step. Clone the repository and open `index.html` in a browser — that's it.
 
 ```bash
 git clone https://github.com/Makhdum813/FuelIQ.git
-```
-
-Open the project folder
-
-```bash
 cd FuelIQ
+# then open index.html
 ```
 
-Launch using a local server.
+---
 
-Example:
+## Data sources
 
-```bash
-python -m http.server
-```
+Efficiency-drop figures are grounded in published data, not guesswork:
 
-or
-
-Use **VS Code Live Server**.
+- **NITI Aayog & Ministry of Petroleum and Natural Gas** — *Roadmap for Ethanol Blending in India 2020–25*
+- **ARAI** — E20 fuel efficiency fleet testing (2–6% mileage loss across a mixed-age fleet)
+- **IEA Advanced Motor Fuels programme** — ethanol and gasoline energy-content data
+- **US Department of Energy, Alternative Fuels Data Center** — fuel property comparisons
 
 ---
 
-# 🌐 Live Demo
+## Disclaimer
 
-https://makhdum813.github.io/FuelIQ/
+FuelIQ produces **estimates for informational and educational purposes only.** Real-world fuel
+economy depends on vehicle condition, driving style, load, terrain and traffic. Figures shown are
+not a guarantee of actual savings or costs, and nothing in this project constitutes financial,
+mechanical or professional advice.
 
----
-
-# 👨‍💻 Creator
-
-## Makhdumhusain Kodkeri
-
-**AI/ML Data Analyst**
-
-Passionate about:
-
-- Artificial Intelligence
-- Data Analytics
-- Frontend Development
-- Prompt Engineering
-- Building practical software tools
-
-### Connect
-
-- LinkedIn: https://www.linkedin.com/in/makhdumhusain-kodkeri-655800305/
-- GitHub: https://github.com/Makhdum813
-
----
-
-# 🛣 Roadmap
-
-- [x] Dashboard
-- [x] Vehicle Profiles
-- [x] Fuel Log
-- [x] Calculation History
-- [x] Budget Planner
-- [x] Trip Planner
-- [x] Vehicle Comparison
-- [x] Fuel Blend Comparison
-- [x] PDF Reports
-- [x] CSV Export
-- [x] AI Insights
-- [x] Backup & Restore
-- [x] Progressive Web App
-- [ ] Cloud Sync
-- [ ] Fuel Price Trends
-- [ ] Mobile App
-- [ ] Maintenance Tracking
-
----
-
-# 🤝 Contributing
-
-Contributions, suggestions, and feature requests are welcome.
-
-If you discover a bug or have an idea to improve FuelIQ, feel free to open an issue or submit a pull request.
-
----
-
-# ⭐ Support
-
-If you find this project useful, please consider giving it a ⭐ on GitHub.
-
-It helps the project reach more people and motivates future development.
-
----
-
-# 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-<div align="center">
-
-### FuelIQ
-
-**Measure. Compare. Save.**
-
-Made with ❤️ by **Makhdumhusain Kodkeri**
-
-</div>
+"FuelIQ" is used here as the name of an independent personal project and is not affiliated with,
+endorsed by, or connected to any other company, product or registered trade mark of a similar name.

@@ -1,14 +1,24 @@
+/*!
+ * FuelIQ — E20 Fuel Economics Analytics
+ * https://fueliq-app.netlify.app/
+ *
+ * Copyright (c) 2026 Makhdumhusain Kodkeri
+ * Released under the MIT License. You may reuse and modify this code,
+ * provided this copyright notice and the licence text are retained.
+ * https://github.com/Makhdum813
+ */
 // Service worker for the E20 Mileage & Cost Impact Calculator.
 // Caches the app shell (HTML, manifest, icons) so the calculator itself
 // works offline. Requests to other origins (e.g. the Wikipedia vehicle-image
 // lookup) are always sent to the network and never cached here, since that
 // feature is explicitly online-only.
 
-const CACHE_NAME = 'e20-calculator-v12';
+const CACHE_NAME = 'e20-calculator-v15';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
+  './assets/logo.png',
   './app.js',
   './utils/format.js',
   './utils/shareLink.js',
