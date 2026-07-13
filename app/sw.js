@@ -4,7 +4,7 @@
 // lookup) are always sent to the network and never cached here, since that
 // feature is explicitly online-only.
 
-const CACHE_NAME = 'e20-calculator-v9';
+const CACHE_NAME = 'e20-calculator-v12';
 const APP_SHELL = [
   './',
   './index.html',

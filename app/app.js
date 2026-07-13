@@ -38,6 +38,7 @@
     vehicleType: document.getElementById('vehicleType'),
     vehicleCompany: document.getElementById('vehicleCompany'),
     vehicleModel: document.getElementById('vehicleModel'),
+    vehicleMileage: document.getElementById('vehicleMileage'),
     vehicleFuelType: document.getElementById('vehicleFuelType'),
     fetchImageBtn: document.getElementById('fetchImageBtn'),
     vehiclePreview: document.getElementById('vehiclePreview'),
@@ -48,6 +49,8 @@
     vpExtract: document.getElementById('vpExtract'),
     // Vehicle profiles
     profileSelect: document.getElementById('profileSelect'),
+    calcVehicleSelect: document.getElementById('calcVehicleSelect'),
+    manageVehiclesBtn: document.getElementById('manageVehiclesBtn'),
     saveProfileBtn: document.getElementById('saveProfileBtn'),
     deleteProfileBtn: document.getElementById('deleteProfileBtn'),
     // Calculation history
@@ -500,8 +503,8 @@
     renderRecentActivity();
   }
 
-  // Recent-activity feed: the five most recent saved calculations, read-only
-  // summaries (clicking through to restore lives in the History tab).
+  // Recent-activity feed: the five most recent saved calculations. Clicking one
+  // restores it into the calculator and refreshes the dashboard in place.
   function renderRecentActivity(){
     if(!el.dashboardRecentActivity) return;
     const entries = historyApi.listSorted().slice(0, 5);
@@ -513,7 +516,7 @@
       const out = entry.outputs;
       const vehicleBadge = entry.vehicleName ? '<span class="hist-badge">' + escapeHTML(entry.vehicleName) + '</span>' : '';
       return '' +
-        '<div class="history-item" style="cursor:default;">' +
+        '<div class="history-item recent-item" data-id="' + entry.id + '" tabindex="0" role="button" aria-label="Restore this calculation and show it on the dashboard">' +
           '<div class="hist-main">' +
             '<div class="hist-top">' + vehicleBadge + '<span class="hist-time">' + fmtRelativeTime(entry.timestamp) + '</span></div>' +
             '<div class="hist-stats">' +
@@ -522,8 +525,24 @@
               '<span class="hist-neg">' + fmtINR(out.extraYearlyCost) + '/yr extra</span>' +
             '</div>' +
           '</div>' +
+          '<span class="recent-cta" aria-hidden="true">Restore ↩</span>' +
         '</div>';
     }).join('');
+  }
+
+  // Clicking (or pressing Enter/Space on) a Recent Activity row restores that
+  // calculation. We stay on the Dashboard and scroll to the KPI cards so the
+  // user immediately sees the restored numbers reflected there.
+  if(el.dashboardRecentActivity){
+    el.dashboardRecentActivity.addEventListener('click', function(e){
+      const item = e.target.closest('.recent-item');
+      if(item) restoreHistoryEntry(item.getAttribute('data-id'), { scrollTo: 'dashboardStats' });
+    });
+    el.dashboardRecentActivity.addEventListener('keydown', function(e){
+      if(e.key !== 'Enter' && e.key !== ' ') return;
+      const item = e.target.closest('.recent-item');
+      if(item){ e.preventDefault(); restoreHistoryEntry(item.getAttribute('data-id'), { scrollTo: 'dashboardStats' }); }
+    });
   }
 
   /* ============ Trip cost calculator ============ */
@@ -837,6 +856,11 @@
   });
 
   el.origMileage.addEventListener('input', renderAdvancedSummary);
+  // Mirror the calculator's mileage back into the Vehicle Profiles field so the
+  // two never show different numbers for the same active vehicle.
+  el.origMileage.addEventListener('input', function(){
+    if(el.vehicleMileage) el.vehicleMileage.value = el.origMileage.value;
+  });
 
   /* ============ Settings: data backup / restore / clear ============ */
 
@@ -1507,9 +1531,25 @@
         return '<option value="' + v.id + '"' + (v.id === activeId ? ' selected' : '') + '>' + escapeHTML(v.name) + '</option>';
       }).join('');
     el.deleteProfileBtn.style.display = activeId ? 'inline-flex' : 'none';
+
+    // Mirror the same vehicles into the Calculator's compact switcher so the
+    // user can change vehicle without leaving the calculator.
+    if(el.calcVehicleSelect){
+      el.calcVehicleSelect.innerHTML =
+        '<option value="">' + (list.length ? 'No vehicle selected' : 'No saved vehicles yet') + '</option>' +
+        list.map(function(v){
+          return '<option value="' + v.id + '"' + (v.id === activeId ? ' selected' : '') + '>' + escapeHTML(v.name) + '</option>';
+        }).join('');
+      el.calcVehicleSelect.value = activeId || '';
+    }
+
     renderFuelLogVehicleHint();
     populateCompareDropdowns();
   }
+
+  // Sensible starting mileage per vehicle type, used only when a saved profile
+  // has no mileage of its own.
+  const DEFAULT_MILEAGE = { car: 15, bike: 45, scooter: 45 };
 
   // Fill the type/company/model/fuel-type/mileage fields from a saved profile,
   // without triggering an image fetch (the user already has a saved image
@@ -1522,28 +1562,67 @@
     populateModels();
     el.vehicleModel.value = vehicle.model;
     if(el.vehicleFuelType) el.vehicleFuelType.value = vehicle.fuelType || 'Petrol';
-    if(vehicle.mileage !== null && vehicle.mileage !== undefined && isFinite(vehicle.mileage)){
-      el.origMileage.value = vehicle.mileage;
+
+    // Mileage must ALWAYS be resynced when switching vehicles. Previously this
+    // assignment was skipped when a profile had no saved mileage, which left
+    // the *previous* vehicle's mileage sitting in the field — so the dashboard
+    // showed the new vehicle's name against the old vehicle's numbers.
+    const savedMileage = Number(vehicle.mileage);
+    const hasMileage = vehicle.mileage !== null && vehicle.mileage !== undefined
+      && isFinite(savedMileage) && savedMileage > 0;
+    if(hasMileage){
+      el.origMileage.value = savedMileage;
+    } else {
+      el.origMileage.value = DEFAULT_MILEAGE[vehicle.type] || 15;
+      showToast('No mileage saved for ' + vehicle.name + ' — set it and hit Save Vehicle.');
     }
+    if(el.vehicleMileage) el.vehicleMileage.value = el.origMileage.value;
+
     renderVehicleFallback('Loaded from saved vehicle. Hit "Refresh Image" to fetch a reference photo.');
     render();
   }
 
-  el.profileSelect.addEventListener('change', function(){
-    const id = el.profileSelect.value;
+  // Single source of truth for "the user picked a vehicle". Both the Vehicle
+  // Profiles dropdown and the Calculator's compact switcher route through this
+  // so they can never fall out of step.
+  function selectVehicle(id){
     if(!id){
       vehiclesApi.setActive(null);
       el.deleteProfileBtn.style.display = 'none';
+      if(el.vehicleMileage) el.vehicleMileage.value = '';
+      if(el.profileSelect) el.profileSelect.value = '';
+      if(el.calcVehicleSelect) el.calcVehicleSelect.value = '';
       renderFuelLogVehicleHint();
+      render();
       return;
     }
     const vehicle = vehiclesApi.getById(id);
     if(!vehicle) return;
     vehiclesApi.setActive(id);
+    if(el.profileSelect) el.profileSelect.value = id;
+    if(el.calcVehicleSelect) el.calcVehicleSelect.value = id;
     applyProfileToForm(vehicle);
     renderFuelLog();
     el.deleteProfileBtn.style.display = 'inline-flex';
+  }
+
+  el.profileSelect.addEventListener('change', function(){
+    selectVehicle(el.profileSelect.value);
   });
+
+  if(el.calcVehicleSelect){
+    el.calcVehicleSelect.addEventListener('change', function(){
+      selectVehicle(el.calcVehicleSelect.value);
+    });
+  }
+
+  // "Add or manage vehicles" jumps to the Vehicle Profiles tab.
+  if(el.manageVehiclesBtn){
+    el.manageVehiclesBtn.addEventListener('click', function(){
+      const target = document.querySelector('.nav-item[data-tab="vehicles"]');
+      if(target) target.click();
+    });
+  }
 
   el.saveProfileBtn.addEventListener('click', function(){
     if(!el.vehicleModel.value){
@@ -1562,6 +1641,19 @@
       && existingVehicle.model === el.vehicleModel.value;
 
     const defaultName = formMatchesExisting ? existingVehicle.name : (el.vehicleCompany.value + ' ' + el.vehicleModel.value).trim();
+
+    // Mileage for the profile comes from the Vehicle Profiles field; fall back
+    // to the calculator's Original Mileage if that field is somehow empty.
+    const rawMileage = (el.vehicleMileage && el.vehicleMileage.value !== '')
+      ? el.vehicleMileage.value
+      : el.origMileage.value;
+    const parsedMileage = parseFloat(rawMileage);
+    if(!isFinite(parsedMileage) || parsedMileage <= 0){
+      showToast('Enter this vehicle\'s mileage (km/L) before saving');
+      if(el.vehicleMileage) el.vehicleMileage.focus();
+      return;
+    }
+
     const name = window.prompt('Name this vehicle (e.g. "My Swift"):', defaultName);
     if(name === null) return; // user cancelled
     const data = {
@@ -1569,18 +1661,32 @@
       company: el.vehicleCompany.value,
       model: el.vehicleModel.value,
       fuelType: el.vehicleFuelType ? el.vehicleFuelType.value : 'Petrol',
-      mileage: parseFloat(el.origMileage.value) || null,
+      mileage: parsedMileage,
       name: name,
     };
     const saved = formMatchesExisting
       ? vehiclesApi.update(existingId, data)
       : vehiclesApi.create(data);
     vehiclesApi.setActive(saved.id);
+    // Keep the calculator in step with the vehicle we just saved/activated.
+    el.origMileage.value = parsedMileage;
     renderProfileSelect();
     el.profileSelect.value = saved.id;
     renderFuelLog();
+    render();
     showToast('Vehicle saved: ' + saved.name);
   });
+
+  // Keep the two mileage inputs in sync so the calculator and the active
+  // vehicle never disagree about the same number.
+  if(el.vehicleMileage){
+    el.vehicleMileage.addEventListener('input', function(){
+      if(el.vehicleMileage.value !== ''){
+        el.origMileage.value = el.vehicleMileage.value;
+        render();
+      }
+    });
+  }
 
   el.deleteProfileBtn.addEventListener('click', function(){
     const id = el.profileSelect.value;
@@ -1630,24 +1736,39 @@
   }
 
   // Restore a saved history entry's inputs into the calculator and re-render.
-  function restoreHistoryEntry(id){
+  // Restore a saved calculation into the calculator inputs.
+  // `opts.scrollTo` picks which results block to scroll into view, so this can
+  // be driven from the History tab (scroll to the calculator results) or from
+  // the Dashboard's Recent Activity feed (stay put, scroll to the dashboard KPIs).
+  function restoreHistoryEntry(id, opts){
     const entry = historyApi.list().find(function(e){ return e.id === id; });
     if(!entry) return;
+    const options = opts || {};
     const inp = entry.inputs;
+
+    // Re-activate the entry's vehicle FIRST. applyProfileToForm() writes the
+    // vehicle's own saved mileage into the mileage field, so it has to run
+    // before we restore the entry's inputs — otherwise it would clobber the
+    // mileage this calculation was actually made with.
+    if(entry.vehicleId && vehiclesApi.getById(entry.vehicleId)){
+      vehiclesApi.setActive(entry.vehicleId);
+      applyProfileToForm(vehiclesApi.getById(entry.vehicleId));
+      renderProfileSelect();
+    }
+
     el.origMileage.value = inp.originalMileage;
     el.mileageDrop.value = inp.mileageDropPct;
     el.mileageDropSlider.value = Math.min(10, inp.mileageDropPct);
     el.petrolPrice.value = inp.petrolPrice;
     el.amountPurchased.value = inp.amountPurchased;
     el.monthlyKm.value = inp.monthlyKm;
-    if(entry.vehicleId && vehiclesApi.getById(entry.vehicleId)){
-      vehiclesApi.setActive(entry.vehicleId);
-      applyProfileToForm(vehiclesApi.getById(entry.vehicleId));
-      renderProfileSelect();
-    }
+    if(el.vehicleMileage) el.vehicleMileage.value = inp.originalMileage;
+
     render();
     showToast('Calculation restored');
-    document.getElementById('headlineStats').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const target = document.getElementById(options.scrollTo || 'headlineStats');
+    if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   el.historyList.addEventListener('click', function(e){

@@ -112,10 +112,10 @@
       if (!isMobile()) closeDrawer();
     });
 
-    // Restore last-open tab, falling back to the default.
-    const settings = storage.getSettings();
-    const startTab = settings.lastTab || DEFAULT_TAB;
-    goTo(startTab);
+    // Always open on the Dashboard. It's the summary screen, so it gives every
+    // session a consistent, glanceable starting point rather than dropping the
+    // user back into whatever form they happened to leave open last time.
+    goTo(DEFAULT_TAB);
   }
 
   global.E20 = global.E20 || {};

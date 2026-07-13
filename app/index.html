@@ -104,6 +104,18 @@
       <div class="card">
         <h2><span class="ic">⛽</span>Your Numbers</h2>
 
+        <div class="field vehicle-switcher">
+          <label>Vehicle
+            <span class="tip">i<span class="bubble">Switch between your saved vehicles without leaving the calculator. Mileage loads automatically.</span></span>
+          </label>
+          <div class="input-row no-prefix">
+            <select id="calcVehicleSelect" class="styled-select">
+              <option value="">No vehicle selected</option>
+            </select>
+          </div>
+          <button type="button" class="link-btn" id="manageVehiclesBtn">＋ Add or manage vehicles</button>
+        </div>
+
         <div class="field">
           <label>Original Mileage (km/L)
             <span class="tip">i<span class="bubble">Your car's mileage before E20, in kilometres per litre.</span></span>
@@ -311,6 +323,16 @@
               <option>CNG</option>
               <option>Diesel</option>
             </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Mileage (km/L)
+            <span class="tip">i<span class="bubble">This vehicle's normal mileage before E20. Saved with the profile, and used for every calculation while this vehicle is active.</span></span>
+          </label>
+          <div class="input-row">
+            <input type="number" id="vehicleMileage" min="0.1" step="0.1" placeholder="e.g. 18">
+            <span class="suffix">km/L</span>
           </div>
         </div>
 
